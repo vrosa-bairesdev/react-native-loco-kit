@@ -11,7 +11,22 @@
 ## Usage
 ```javascript
 import LocoKit from 'react-native-loco-kit';
+import { ... NativeEventEmitter } from 'react-native';
 
-// TODO: What to do with the module?
-LocoKit;
+    componentDidMount() {
+        const bus = new NativeEventEmitter(LocoKitModule)
+        bus.addListener('LocationStatusEvent', (data) => this.setState({ locationStatus: data }))
+        bus.addListener('TimeLineStatusEvent', (data) => this.setState({ item: data }))
+        bus.addListener('ActivityTypeEvent', (data) => this.setState({ activity: data }))
+        LocoKitModule.isAvailable((available) => {
+            if (available) {
+                LocoKitModule.setup("<API Key Goes Here>", (result) => {
+                    this.setState({ status: result })
+                    LocoKitModule.start()
+                });
+            } else {
+                this.setState({ status: "LocoKit not available" })
+            }
+        })
+    }
 ```

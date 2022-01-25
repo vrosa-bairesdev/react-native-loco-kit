@@ -18,12 +18,11 @@ public class LocoKitModule extends ReactContextBaseJavaModule {
 
     @Override
     public String getName() {
-        return "LocoKit";
+        return "LocoKitModule";
     }
 
     @ReactMethod
-    public void sampleMethod(String stringArgument, int numberArgument, Callback callback) {
-        // TODO: Implement some actually useful functionality
-        callback.invoke("Received numberArgument: " + numberArgument + " stringArgument: " + stringArgument);
+    public void isAvailable(Callback callback){
+        callback.invoke(false);
     }
 }

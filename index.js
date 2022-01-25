@@ -2,6 +2,6 @@
 
 import { NativeModules } from 'react-native';
 
-const { LocoKit } = NativeModules;
+const { LocoKitModule } = NativeModules;
 
-export default LocoKit;
+export default LocoKitModule;
