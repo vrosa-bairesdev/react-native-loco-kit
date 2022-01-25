@@ -72,7 +72,15 @@ PODS:
     - FlipperKit/FlipperKitNetworkPlugin
   - fmt (6.2.1)
   - glog (0.3.5)
+  - GRDB.swift (4.14.0):
+    - GRDB.swift/standard (= 4.14.0)
+  - GRDB.swift/standard (4.14.0)
   - libevent (2.1.12)
+  - LocoKit (7.1.0):
+    - LocoKit/Base (= 7.1.0)
+  - LocoKit/Base (7.1.0):
+    - GRDB.swift (~> 4)
+    - Upsurge (~> 0.10)
   - OpenSSL-Universal (1.1.180)
   - RCT-Folly (2021.06.28.00-v2):
     - boost
@@ -273,7 +281,9 @@ PODS:
   - React-logger (0.67.0):
     - glog
   - react-native-loco-kit (1.0.0):
+    - LocoKit
     - React
+    - SwiftNotes
   - React-perflogger (0.67.0)
   - React-RCTActionSheet (0.67.0):
     - React-Core/RCTActionSheetHeaders (= 0.67.0)
@@ -339,6 +349,8 @@ PODS:
     - React-jsi (= 0.67.0)
     - React-logger (= 0.67.0)
     - React-perflogger (= 0.67.0)
+  - SwiftNotes (1.1.0)
+  - Upsurge (0.10.2)
   - Yoga (1.14.0)
   - YogaKit (1.18.1):
     - Yoga (~> 1.14)
@@ -370,6 +382,9 @@ DEPENDENCIES:
   - FlipperKit/FlipperKitUserDefaultsPlugin (= 0.99.0)
   - FlipperKit/SKIOSNetworkPlugin (= 0.99.0)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
+  - GRDB.swift (~> 4.14.0)
+  - LocoKit (from `https://github.com/sobri909/LocoKit.git`, branch `master`)
+  - LocoKit/Base (from `https://github.com/sobri909/LocoKit.git`, branch `master`)
   - OpenSSL-Universal (= 1.1.180)
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCTRequired (from `../node_modules/react-native/Libraries/RCTRequired`)
@@ -398,6 +413,7 @@ DEPENDENCIES:
   - React-RCTVibration (from `../node_modules/react-native/Libraries/Vibration`)
   - React-runtimeexecutor (from `../node_modules/react-native/ReactCommon/runtimeexecutor`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
+  - SwiftNotes
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -413,8 +429,11 @@ SPEC REPOS:
     - Flipper-RSocket
     - FlipperKit
     - fmt
+    - GRDB.swift
     - libevent
     - OpenSSL-Universal
+    - SwiftNotes
+    - Upsurge
     - YogaKit
 
 EXTERNAL SOURCES:
@@ -428,6 +447,9 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/React/FBReactNativeSpec"
   glog:
     :podspec: "../node_modules/react-native/third-party-podspecs/glog.podspec"
+  LocoKit:
+    :branch: master
+    :git: https://github.com/sobri909/LocoKit.git
   RCT-Folly:
     :podspec: "../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec"
   RCTRequired:
@@ -481,6 +503,11 @@ EXTERNAL SOURCES:
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
+CHECKOUT OPTIONS:
+  LocoKit:
+    :commit: 1c3c5f9cb696ce993d26ae180b2eba53f00bae9b
+    :git: https://github.com/sobri909/LocoKit.git
+
 SPEC CHECKSUMS:
   boost: a7c83b31436843459a1961bfd74b96033dc77234
   CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
@@ -498,7 +525,9 @@ SPEC CHECKSUMS:
   FlipperKit: d8d346844eca5d9120c17d441a2f38596e8ed2b9
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
   glog: 85ecdd10ee8d8ec362ef519a6a45ff9aa27b2e85
+  GRDB.swift: 8cc3ab7c8b8b4ac1761deb8dca4b51c1c9d429f8
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
+  LocoKit: 1dd5ae8d7f06a1a3c5d5831367d3c05c6a51a80f
   OpenSSL-Universal: 1aa4f6a6ee7256b83db99ec1ccdaa80d10f9af9b
   RCT-Folly: 803a9cfd78114b2ec0f140cfa6fa2a6bafb2d685
   RCTRequired: 1af97c470c81e8cbb92c5ae42c4838ea95761743
@@ -512,7 +541,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: 3001f865cfd2c66c1298f427be47b8797ae5843b
   React-jsinspector: c9d1ddf4b1efbcf90323e3581ccff200cf4de346
   React-logger: 5d42caeaf0c31a9b29efb33e10e7f7031f958bfd
-  react-native-loco-kit: 40733c92dbd36d2ca56b8365e616ec1ecb8bda93
+  react-native-loco-kit: 808675a93bfc192275d759f83a459e3b3184fed0
   React-perflogger: 9454d63e7027e0830fa3e527628558160684f5dd
   React-RCTActionSheet: 240d798e2f5bd1ba2e85503a00fd390f560e6827
   React-RCTAnimation: 0ebf0df36838057097b8c6a30d1036531f8c7b1e
@@ -525,9 +554,11 @@ SPEC CHECKSUMS:
   React-RCTVibration: 7d7eb0db1f7f914945a606e0e91bb535099a07db
   React-runtimeexecutor: 4512c9287cc72ba30bb1d5e01e6bde7a69f2d22b
   ReactCommon: af6dd2c8c0de935841fa809caf41b2093bb9075c
+  SwiftNotes: 51d71568d7515c5c82aa791b88900cf8059b8beb
+  Upsurge: 5866beadc3da27f91c5df4ac795deb3f3238d678
   Yoga: 3f5bfc54ce164fcd5b5d7f9f4232182d6298dd56
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: b238204fde808b9d15816fe170aa2c48b884b8b0
+PODFILE CHECKSUM: 14b9d49c0c4f7623ae15967d756696324d803fc0
 
 COCOAPODS: 1.11.2

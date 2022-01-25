@@ -51,5 +51,17 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+  <key>NSMotionUsageDescription</key>
+  <string>Access location and motion</string>
+  <key>NSLocationAlwaysUsageDescription</key>
+  <string>Access location and motion</string>
+  <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+  <string>Access location and motion</string>
+  <key>NSLocationWhenInUseUsageDescription</key>
+  <string>Access location and motion</string>
+  <key>UIBackgroundModes</key>
+  <array>
+    <string>location</string>
+  </array>
 </dict>
 </plist>

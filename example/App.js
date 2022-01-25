@@ -9,29 +9,48 @@
  */
 
 import React, { Component } from 'react';
-import { Platform, StyleSheet, Text, View } from 'react-native';
-import LocoKit from 'react-native-loco-kit';
+import { Platform, ScrollView, StyleSheet, Text, View, NativeEventEmitter } from 'react-native';
+import LocoKitModule from 'react-native-loco-kit';
+
 
 export default class App extends Component<{}> {
   state = {
     status: 'starting',
-    message: '--'
+    locationStatus: '...',
+    activity: '...',
+    item: '...',
   };
+  status = {}
+
+
   componentDidMount() {
-    LocoKit.sampleMethod('Testing', 123, (message) => {
-      this.setState({
-        status: 'native callback received',
-        message
-      });
-    });
+    const bus = new NativeEventEmitter(LocoKitModule)
+    bus.addListener('LocationStatusEvent', (data) => this.setState({ locationStatus: data }))
+    bus.addListener('TimeLineStatusEvent', (data) => this.setState({ item: data }))
+    bus.addListener('ActivityTypeEvent', (data) => this.setState({ activity: data }))
+    LocoKitModule.isAvailable((available) => {
+      console.log(available)
+      if (available) {
+        LocoKitModule.setup("<API Key Goes Here>", (result) => {
+          this.setState({ status: result })
+          LocoKitModule.start()
+        });
+      } else {
+        this.setState({ status: "LocoKit not available" })
+      }
+    })
   }
   render() {
     return (
       <View style={styles.container}>
         <Text style={styles.welcome}>☆LocoKit example☆</Text>
         <Text style={styles.instructions}>STATUS: {this.state.status}</Text>
-        <Text style={styles.welcome}>☆NATIVE CALLBACK MESSAGE☆</Text>
-        <Text style={styles.instructions}>{this.state.message}</Text>
+        <Text style={styles.welcome}>NATIVE CALLBACK MESSAGE</Text>
+        <Text style={styles.instructions}>Location Status: {this.state.locationStatus}</Text>
+        <Text style={styles.instructions}>Activity: {this.state.activity}</Text>
+        <ScrollView>
+          <Text style={styles.instructions}>TimelineItem: {this.state.item}</Text>
+        </ScrollView>
       </View>
     );
   }
@@ -43,6 +62,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
+    marginTop: 40
   },
   welcome: {
     fontSize: 20,
