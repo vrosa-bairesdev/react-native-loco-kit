@@ -12,7 +12,6 @@ import React, { Component } from 'react';
 import { Platform, ScrollView, StyleSheet, Text, View, NativeEventEmitter } from 'react-native';
 import LocoKitModule from 'react-native-loco-kit';
 
-
 export default class App extends Component<{}> {
   state = {
     status: 'starting',
@@ -26,7 +25,7 @@ export default class App extends Component<{}> {
   componentDidMount() {
     const bus = new NativeEventEmitter(LocoKitModule)
     bus.addListener('LocationStatusEvent', (data) => this.setState({ locationStatus: data }))
-    bus.addListener('TimeLineStatusEvent', (data) => this.setState({ item: data }))
+    bus.addListener('TimeLineStatusEvent', (data) => {this.setState({ item: data }); console.log(data); })
     bus.addListener('ActivityTypeEvent', (data) => this.setState({ activity: data }))
     LocoKitModule.isAvailable((available) => {
       console.log(available)
