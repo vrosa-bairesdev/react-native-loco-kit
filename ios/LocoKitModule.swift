@@ -159,84 +159,75 @@ class LocoKitModule: RCTEventEmitter  {
     
     func registerTimelineItem(item: TimelineItem,  onCompletion: ((Bool, Error?) -> Void)? = nil) {
         if item.isWorthKeeping {
-            var results:Dictionary<String, Any>
-            if let classifierResults =  item.classifierResults {
-                results = [
-                    "best": [
-                        "name": classifierResults.best.name.displayName,
-                        "modelAccuracyScore": classifierResults.best.modelAccuracyScore ?? 0,
-                        "score": classifierResults.best.score
-                    ]
-                ]
-            } else {
-                results = [:]
+            guard let classifierResults = item.classifierResults else {
+                return
             }
-            
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
-            
-            var rpath: Dictionary<String, Any> = [:]
+            var rpath: DataPath?
             if let path = item as? Path {
-                rpath = [
-                    "distance": path.distance,
-                    "speed": path.metresPerSecond,
-                    "kph": path.kph,
-                    "activityType": path.activityType?.displayName ?? "Unknown",
-                ]
+                rpath = DataPath(
+                    distance: path.distance,
+                    speed: path.metresPerSecond,
+                    kph: path.kph,
+                    activityType:path.activityType?.displayName ?? "Unknown"
+                )
             }
-            var rvisit: Dictionary<String, Any> = [:]
+            var rvisit: DataVisit?
             if let visit = item as? Visit {
-                rvisit = [
-                    "radius": visit.radius2sd,
-                    "duration": visit.duration,
-                    "latitude": visit.center?.coordinate.latitude ?? 0.0,
-                    "longitude": visit.center?.coordinate.longitude ?? 0.0,
-                    "activityType": visit.activityType?.displayName ?? "Unknown"
-                ]
+                rvisit = DataVisit(
+                    activityType: visit.activityType?.displayName ?? "Unknown",
+                    duration: visit.duration,
+                    latitude: visit.center?.coordinate.latitude ?? 0.0,
+                    longitude: visit.center?.coordinate.longitude ?? 0.0,
+                    radius: visit.radius2sd
+                )
             }
+            let result = LocoKitData(
+                altitude: item.altitude ?? -1,
+                classifierResults: ClassifierResults(
+                    best: Best(
+                        modelAccuracyScore: classifierResults.best.modelAccuracyScore ?? 0.0,
+                        name: classifierResults.best.name.displayName,
+                        score: classifierResults.best.score
+                    )
+                ),
+                dateRange: DateRange(
+                    end:  item.dateRange?.end,
+                    start: item.dateRange?.start
+                ),
+                floorsAscended: item.floorsAscended ?? 0,
+                floorsDescended: item.floorsDescended ?? 0,
+                keepnessScore: item.keepnessScore,
+                dataPath: rpath,
+                dataSamples: item.samples.map { sample in
+                    let date = sample.date
+                    let latitude = sample.location?.coordinate.latitude ?? nil
+                    let longitude = sample.location?.coordinate.longitude ?? nil
+                    let courseVariance = sample.courseVariance ?? 0
+                    let stepHz = sample.stepHz ?? 0.0
+                    let activityType:String = sample.activityType?.displayName ?? "Unknown"
+                    return DataSample(
+                        activityType: activityType,
+                        coordinates: Coordinates(lat: latitude, lng: longitude),
+                        courseVariance: courseVariance,
+                        date: date,
+                        stepHz: stepHz
+                    )
+                },
+                dataVisit: rvisit
+            );
             
-            var sampleResult: [[String: Any]] = []
-            
-            for sample in item.samples{
-                let date = sample.date
-                let latitude = sample.location?.coordinate.latitude ?? nil
-                let longitude = sample.location?.coordinate.longitude ?? nil
-                let courseVariance = sample.courseVariance ?? 0
-                let stepHz = sample.stepHz ?? 0
-                let activityType:String = sample.activityType?.displayName ?? "Unknown"
-                
-                sampleResult.append([
-                    "date": dateFormatter.string(from: date),
-                    "coordinates": [latitude, longitude],
-                    "courseVariance": courseVariance,
-                    "stepHz": stepHz,
-                    "activityType": activityType,
-                ])
-                print("sample: \(sampleResult)")
+            let jsonEncoder = JSONEncoder()
+            do {
+                let jsonData = try jsonEncoder.encode(result)
+                let jsonString = String(data: jsonData, encoding: .utf8)
+                print("JSON String : " + jsonString!)
+                self.sendEvent(withName: EventTypes.timeLineStatusEvent.rawValue, body: jsonString)
             }
-            
-            let floorsAsc:Int = item.floorsAscended ?? 0
-            let floorsDsc:Int = item.floorsDescended ?? 0
-            
-            let data:[String: Any] = [
-                "keepnessScore": item.keepnessScore,
-                "classifierResults": results,
-                "altitude": item.altitude ?? -1,
-                "floorsAscended": floorsAsc,
-                "floorsDescended": floorsDsc,
-                "samples": sampleResult,
-                "dateRange": [
-                    "start" : dateFormatter.string(from: item.dateRange?.start ?? Date(timeIntervalSince1970:0)),
-                    "end": dateFormatter.string(from: item.dateRange?.end ?? Date(timeIntervalSince1970:0))
-                ],
-                "dateRangeQueryable": [
-                    "start" : item.dateRange?.start,
-                    "end":  item.dateRange?.end
-                ],
-                "path": rpath,
-                "visit": rvisit,
-            ]
-            self.sendEvent(withName: EventTypes.timeLineStatusEvent.rawValue, body: String(describing: data))
+            catch {
+                print("Error Parsing JSON")
+            }
         }
     }
     
