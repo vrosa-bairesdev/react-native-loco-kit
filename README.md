@@ -37,6 +37,33 @@ export default class App extends Component<{}> {
 
 ```
 
+```javascript
+  useEffect(() => {
+    const bus = new NativeEventEmitter(NativeModules.LocoKitModule)
+    const ll = bus.addListener('LocationStatusEvent', (data) => console.log("LocationStatusEvent",data))
+    const tl = bus.addListener('TimeLineStatusEvent', (data) => console.log("TimeLineStatusEvent",data))
+    const al = bus.addListener('ActivityTypeEvent', (data) => console.log("ActivityTypeEvent",data))
+    if (NativeModules.LocoKitModule){
+      NativeModules.LocoKitModule.isAvailable((available) => {
+        console.log(available)
+        if (available) {
+          NativeModules.LocoKitModule.setup("<API Key Goes Here>", (result) => {
+            console.log("LocoKitModule.setup", { status: result })
+            NativeModules.LocoKitModule.start()
+          });
+        } else {
+          console.log("LocoKitModule", { status: "LocoKit not available" })
+        }
+      })
+    } 
+    return function cleanup(){
+      ll.remove()
+      tl.remove()
+      al.remove()
+    }
+  },[])
+```
+
 
 ## iOS Podfile
 
