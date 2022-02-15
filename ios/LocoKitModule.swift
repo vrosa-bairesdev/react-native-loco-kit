@@ -26,6 +26,13 @@ class LocoKitModule: RCTEventEmitter  {
     private var store    : TimelineStore?
     private var recorder : TimelineRecorder?
     
+    
+    override init() {
+        super.init()
+        EventEmitter.sharedInstance.registerEventEmitter(eventEmitter: self)
+    }
+    
+    
     @objc(setup:callback:)
     func setup(_ key: String, callback:(([Any]) -> Void)) -> Void {
         DispatchQueue.main.sync {
@@ -42,26 +49,25 @@ class LocoKitModule: RCTEventEmitter  {
                     callback(["OK"])
                 }
                 LocomotionManager.highlander.locationManager.requestAlwaysAuthorization()
-                
-                if #available(iOS 14.0, *) {
-                    sendEvent(
-                        withName: EventTypes.locationStatusEvent.rawValue,
-                        body: LocomotionManager.highlander.locationManager.authorizationStatus.rawValue
-                    )
-                } else {
-                    sendEvent(
-                        withName: EventTypes.locationStatusEvent.rawValue,
-                        body: "Unknown"
-                    )
+                if let _ = self.bridge {
+                    if #available(iOS 14.0, *) {
+                        EventEmitter.sharedInstance.dispatch(
+                            name: EventTypes.locationStatusEvent.rawValue,
+                            body: LocomotionManager.highlander.locationManager.authorizationStatus.rawValue
+                        )
+                    } else {
+                        EventEmitter.sharedInstance.dispatch(
+                            name: EventTypes.locationStatusEvent.rawValue,
+                            body: "Unknown"
+                        )
+                    }
                 }
             }
         }
     }
     
     override func supportedEvents() -> [String]! {
-        return [EventTypes.locationStatusEvent, EventTypes.timeLineStatusEvent, EventTypes.activityTypeEvent].map { e in
-            e.rawValue
-        };
+        return EventEmitter.sharedInstance.allEvents;
     }
     
     @objc
@@ -129,7 +135,7 @@ class LocoKitModule: RCTEventEmitter  {
             // observe changes in the moving state (moving / stationary)
             when(loco, does: .movingStateChanged) { _ in
                 print(".movingStateChanged (\(loco.movingState))")
-                self.sendEvent(withName: EventTypes.activityTypeEvent.rawValue, body: loco.movingState.rawValue)
+                EventEmitter.sharedInstance.dispatch(name: EventTypes.activityTypeEvent.rawValue, body: loco.movingState.rawValue)
             }
             
             when(loco, does: .wentFromRecordingToSleepMode) { _ in
@@ -143,7 +149,7 @@ class LocoKitModule: RCTEventEmitter  {
     }
     
     func registerLocationStatus(_ status: String) -> Void {
-        self.sendEvent(withName: EventTypes.locationStatusEvent.rawValue, body: status)
+        EventEmitter.sharedInstance.dispatch(name: EventTypes.locationStatusEvent.rawValue, body: status)
     }
     
     func stop () -> Void {
@@ -223,12 +229,44 @@ class LocoKitModule: RCTEventEmitter  {
                 let jsonData = try jsonEncoder.encode(result)
                 let jsonString = String(data: jsonData, encoding: .utf8)
                 print("JSON String : " + jsonString!)
-                self.sendEvent(withName: EventTypes.timeLineStatusEvent.rawValue, body: jsonString)
+                EventEmitter.sharedInstance.dispatch(name: EventTypes.timeLineStatusEvent.rawValue, body: jsonString)
             }
             catch {
                 print("Error Parsing JSON")
             }
+        } else {
+            print("Item is not worth keeping")
         }
     }
     
+}
+
+
+class EventEmitter {
+    /// Shared Instance.
+    public static var sharedInstance = EventEmitter()
+
+    // ReactNativeEventEmitter is instantiated by React Native with the bridge.
+    private static var eventEmitter: LocoKitModule!
+
+    private init() {}
+
+    // When React Native instantiates the emitter it is registered here.
+    func registerEventEmitter(eventEmitter: LocoKitModule) {
+        EventEmitter.eventEmitter = eventEmitter
+    }
+
+    func dispatch(name: String, body: Any?) {
+        EventEmitter.eventEmitter.sendEvent(withName: name, body: body)
+    }
+
+    /// All Events which must be support by React Native.
+    lazy var allEvents: [String] = {
+        var allEventNames: [String] = []
+        [EventTypes.locationStatusEvent, EventTypes.timeLineStatusEvent, EventTypes.activityTypeEvent].forEach { e in
+            allEventNames.append(e.rawValue)
+        }
+        return allEventNames
+    }()
+
 }
