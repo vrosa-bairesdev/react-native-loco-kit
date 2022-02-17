@@ -225,6 +225,7 @@ class LocoKitModule: RCTEventEmitter  {
             );
             
             let jsonEncoder = JSONEncoder()
+            jsonEncoder.dateEncodingStrategy = .iso8601
             do {
                 let jsonData = try jsonEncoder.encode(result)
                 let jsonString = String(data: jsonData, encoding: .utf8)
