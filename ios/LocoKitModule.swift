@@ -190,6 +190,7 @@ class LocoKitModule: RCTEventEmitter  {
                 )
             }
             let result = LocoKitData(
+                id: item.id.uuidString,
                 altitude: item.altitude ?? -1,
                 classifierResults: ClassifierResults(
                     best: Best(
@@ -214,6 +215,7 @@ class LocoKitModule: RCTEventEmitter  {
                     let stepHz = sample.stepHz ?? 0.0
                     let activityType:String = sample.activityType?.displayName ?? "Unknown"
                     return DataSample(
+                        id: sample.objectId.uuidString,
                         activityType: activityType,
                         coordinates: Coordinates(lat: latitude, lng: longitude),
                         courseVariance: courseVariance,
