@@ -7,6 +7,7 @@ import Foundation
 
 // MARK: - LocoKitData
 class LocoKitData: Codable {
+    let id: String
     let altitude: Double
     let classifierResults: ClassifierResults
     let dateRange: DateRange
@@ -16,6 +17,7 @@ class LocoKitData: Codable {
     let dataVisit: DataVisit?
 
     init(
+        id: String,
         altitude: Double,
         classifierResults: ClassifierResults,
         dateRange: DateRange,
@@ -26,6 +28,7 @@ class LocoKitData: Codable {
         dataSamples: [DataSample],
         dataVisit: DataVisit?
     ) {
+        self.id = id
         self.altitude = altitude
         self.classifierResults = classifierResults
         self.dateRange = dateRange
@@ -75,13 +78,21 @@ class DataPath: Codable {
 
 // MARK: - DataSample
 class DataSample: Codable {
+    let id: String
     let activityType: String
     let coordinates: Coordinates
     let courseVariance: Double
     let date: Date
     let stepHz: Double
 
-    init(activityType: String, coordinates: Coordinates, courseVariance: Double, date: Date, stepHz: Double) {
+    init(
+        id: String,
+        activityType: String,
+        coordinates: Coordinates,
+        courseVariance: Double,
+        date: Date,
+        stepHz: Double) {
+        self.id = id
         self.activityType = activityType
         self.coordinates = coordinates
         self.courseVariance = courseVariance
